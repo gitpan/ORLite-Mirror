@@ -1,0 +1,36 @@
+NAME
+    ORLite::Mirror - Extend ORLite to support remote SQLite databases
+
+SYNOPSIS
+      # Regular ORLite on a readonly file
+      use ORLite 'path/mydb.sqlite';
+  
+      # The equivalent for a remote file
+      use ORLite::Mirror 'http://myserver/path/mydb.sqlite';
+
+DESCRIPTION
+    ORLite provides a readonly ORM API when it loads a readonly SQLite
+    database.
+
+    In essense, it lets you define a complete readonly ORM on top of any
+    arbitrary published SQLite database in only one line of code.
+
+SUPPORT
+    Bugs should be reported via the CPAN bug tracker at
+
+    <http://rt.cpan.org/NoAuth/ReportBug.html?Queue=ORLite-Mirror>
+
+    For other issues, contact the author.
+
+AUTHOR
+    Adam Kennedy <adamk@cpan.org>
+
+COPYRIGHT
+    Copyright 2008 Adam Kennedy.
+
+    This program is free software; you can redistribute it and/or modify it
+    under the same terms as Perl itself.
+
+    The full text of the license can be found in the LICENSE file included
+    with this module.
+
