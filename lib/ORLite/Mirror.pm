@@ -2,17 +2,19 @@ package ORLite::Mirror;
 
 use 5.006;
 use strict;
-use Carp           ();
-use File::Spec     ();
-use File::Path     ();
-use File::HomeDir  ();
-use LWP::UserAgent ();
-use Params::Util   qw{ _STRING _HASH };
-use ORLite         ();
+use Carp                   ();
+use File::Spec             ();
+use File::Path             ();
+use File::Remove           ();
+use File::HomeDir          ();
+use LWP::UserAgent         ();
+use Params::Util           qw{ _STRING _HASH };
+use IO::Uncompress::Gunzip ();
+use ORLite                 ();
 
 use vars qw{$VERSION @ISA};
 BEGIN {
-	$VERSION = '0.01';
+	$VERSION = '0.02';
 	@ISA     = qw{ ORLite };
 }
 
@@ -70,9 +72,22 @@ sub import {
 
 	# Attempt to update the mirror
 	my $url      = delete $params{url};
+	if ( $url =~ /\.gz$/ ) {
+		$path .= '.gz';
+	}
 	my $response = $useragent->mirror( $url => $path );
 	unless ( $response->is_success ) {
 		Carp::croak("Error: Failed to fetch $url");
+	}
+
+	# Decompress if needed
+	my $zipped = $path;
+	if ( $path =~ /\.gz$/ ) {
+		$path =~ s/\.gz$//;
+		IO::Uncompress::Gunzip::gunzip(
+			$zipped    => $path,
+			BinModeOut => 1,
+		) or Carp::croak("Failed to unzip $zipped");
 	}
 
 	# Mirrored databases are always readonly.
@@ -93,18 +108,29 @@ ORLite::Mirror - Extend ORLite to support remote SQLite databases
 
 =head1 SYNOPSIS
 
-  # Regular ORLite on a readonly file
+  # Regular ORLite on a readonly SQLite database
   use ORLite 'path/mydb.sqlite';
   
-  # The equivalent for a remote file
+  # The equivalent for a remote SQLite database
   use ORLite::Mirror 'http://myserver/path/mydb.sqlite';
+  
+  # You can read compressed SQLite databases as well
+  use ORLite::Mirror 'http://myserver/path/mydb.sqlite.gz';
 
 =head1 DESCRIPTION
 
-L<ORLite> provides a readonly ORM API when it loads a readonly SQLite database.
+L<ORLite> provides a readonly ORM API when it loads a readonly SQLite
+database from your local system.
 
-In essense, it lets you define a complete readonly ORM on top of any arbitrary
-published SQLite database in only one line of code.
+By combining this capability with L<LWP>, L<ORLite::Mirror> goes one step
+better and allows you to load a SQLite database from any arbitrary URI in
+readonly form as well.
+
+As demonstrated in the synopsis above, you using L<ORLite::Mirror> in the
+same way, but provide a URL instead of a file name.
+
+If the URL explicitly ends with a '.gz' then L<ORLite::Mirror> will
+decompress the file before loading it.
 
 =head1 SUPPORT
 

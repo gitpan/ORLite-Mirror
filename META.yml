@@ -3,6 +3,7 @@ abstract: 'Extend ORLite to support remote SQLite databases'
 author:
   - 'Adam Kennedy <adamk@cpan.org>'
 build_requires:
+  IO::Compress::Gzip: 2.006
   Test::More: 0.47
 distribution_type: module
 generated_by: 'Module::Install version 0.75'
@@ -17,12 +18,13 @@ no_index:
     - inc
     - t
 requires:
-  Class::Inspector: 1.20
   File::HomeDir: 0.69
   File::Path: 2.04
   File::Spec: 0.80
+  IO::Uncompress::Gunzip: 2.006
   LWP: 5.806
   ORLite: 0.07
+  Params::Util: 0.33
   URI: 1.35
   perl: 5.6.0
-version: 0.01
+version: 0.02
