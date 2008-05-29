@@ -10,6 +10,9 @@ SYNOPSIS
   
       # You can read compressed SQLite databases as well
       use ORLite::Mirror 'http://myserver/path/mydb.sqlite.gz';
+      use ORLite::Mirror 'http://myserver/path/mydb.sqlite.bz2';
+  
+      (Of course you can only do one of the above)
 
 DESCRIPTION
     ORLite provides a readonly ORM API when it loads a readonly SQLite
@@ -22,8 +25,8 @@ DESCRIPTION
     As demonstrated in the synopsis above, you using ORLite::Mirror in the
     same way, but provide a URL instead of a file name.
 
-    If the URL explicitly ends with a '.gz' then ORLite::Mirror will
-    decompress the file before loading it.
+    If the URL explicitly ends with a '.gz' or '.bz2' then ORLite::Mirror
+    will decompress the file before loading it.
 
 SUPPORT
     Bugs should be reported via the CPAN bug tracker at
