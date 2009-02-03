@@ -3,11 +3,11 @@ abstract: 'Extend ORLite to support remote SQLite databases'
 author:
   - 'Adam Kennedy <adamk@cpan.org>'
 build_requires:
-  IO::Compress::Bzip2: 2.011
-  IO::Compress::Gzip: 2.011
+  IO::Compress::Bzip2: 2.008
+  IO::Compress::Gzip: 2.008
   Test::More: 0.47
 distribution_type: module
-generated_by: 'Module::Install version 0.77'
+generated_by: 'Module::Install version 0.78'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -23,13 +23,13 @@ requires:
   File::Path: 2.04
   File::Remove: 1.40
   File::Spec: 0.80
-  IO::Uncompress::Bunzip2: 2.011
-  IO::Uncompress::Gunzip: 2.011
+  IO::Uncompress::Bunzip2: 2.008
+  IO::Uncompress::Gunzip: 2.008
   LWP: 5.806
-  ORLite: 0.13
+  ORLite: 1.19
   Params::Util: 0.33
   URI: 1.35
   perl: 5.6.0
 resources:
   license: http://dev.perl.org/licenses/
-version: 0.09
+version: 1.10
