@@ -15,7 +15,7 @@ use ORLite 1.19             ();
 
 use vars qw{$VERSION @ISA};
 BEGIN {
-	$VERSION = '1.10';
+	$VERSION = '1.11';
 	@ISA     = qw{ ORLite };
 }
 
@@ -75,8 +75,8 @@ sub import {
 	);
 	my $file = $params{package} . '.sqlite';
 	$file =~ s/::/-/g;
-	my $path = File::Spec->catfile( $dir, $file );
-	unless ( -f $path ) {
+	my $db = File::Spec->catfile( $dir, $file );
+	unless ( -f $db ) {
 		# If the file doesn't exist, sync at compile time.
 		$params{update} = 'compile';
 	}
@@ -87,10 +87,8 @@ sub import {
 	}
 
 	# Download compressed files with their extention first
-	my $url = delete $params{url};
-	if ( $url =~ /(\.gz|\.bz2)$/ ) {
-		$path .= $1;
-	}
+	my $url  = delete $params{url};
+	my $path = ($url =~ /(\.gz|\.bz2)$/) ? "$db$1" : $db;
 
 	# Find the maximum age for the local database copy
 	unless ( defined $params{maxage} ) {
@@ -101,9 +99,7 @@ sub import {
 	}
 
 	# Don't update if the file is newer than the maxage
-	my $archive = $path;
-	my $fileage = time - (stat($path))[9];
-	unless ( -f $path and $fileage < $params{maxage} ) {
+	unless ( -f $path and (time - (stat($path))[9]) < $params{maxage} ) {
 		# Create the default useragent
 		my $useragent = delete $params{useragent};
 		unless ( $useragent ) {
@@ -122,32 +118,24 @@ sub import {
 
 		# Decompress if we pulled an archive
 		if ( $path =~ /\.gz$/ ) {
-			$path =~ s/\.gz$//;
 			unless ( $response->code == 304 and -f $path ) {
 				IO::Uncompress::Gunzip::gunzip(
-					$archive   => $path,
+					$path      => $db,
 					BinModeOut => 1,
-				) or Carp::croak("gunzip($archive) failed");
+				) or Carp::croak("gunzip($path) failed");
 			}
 		} elsif ( $path =~ /\.bz2$/ ) {
-			$path =~ s/\.bz2$//;
 			unless ( $response->code == 304 and -f $path ) {
 				IO::Uncompress::Bunzip2::bunzip2(
-					$archive   => $path,
+					$path      => $db,
 					BinModeOut => 1,
-				) or Carp::croak("bunzip2($archive) failed");
+				) or Carp::croak("bunzip2($path) failed");
 			}
-		}
-	} else {
-		if ( $path =~ /\.gz$/ ) {
-			$path =~ s/\.gz$//;
-		} elsif ( $path =~ /\.bz2$/ ) {
-			$path =~ s/\.bz2$//;
 		}
 	}
 
 	# Mirrored databases are always readonly.
-	$params{file}     = $path;
+	$params{file}     = $db;
 	$params{readonly} = 1;
 
 	# Hand off to the main ORLite class.
