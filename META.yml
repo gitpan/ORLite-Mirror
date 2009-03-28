@@ -6,8 +6,10 @@ build_requires:
   IO::Compress::Bzip2: 2.008
   IO::Compress::Gzip: 2.008
   Test::More: 0.47
+configure_requires:
+  ExtUtils::MakeMaker: 6.48
 distribution_type: module
-generated_by: 'Module::Install version 0.79'
+generated_by: 'Module::Install version 0.81'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -26,10 +28,11 @@ requires:
   IO::Uncompress::Bunzip2: 2.008
   IO::Uncompress::Gunzip: 2.008
   LWP: 5.806
+  LWP::Online: 1.07
   ORLite: 1.19
   Params::Util: 0.33
   URI: 1.35
   perl: 5.6.0
 resources:
   license: http://dev.perl.org/licenses/
-version: 1.11
+version: 1.12
