@@ -17,7 +17,7 @@ Makefile.PL
 MANIFEST			This list of files
 META.yml
 README
-share/ORLite-Mirror-Test5/stub.db
+share/stub.db
 t/01_compile.t
 t/02_basics.sql
 t/02_basics.t
