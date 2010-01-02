@@ -21,11 +21,14 @@ share/stub.db
 t/01_compile.t
 t/02_basics.sql
 t/02_basics.t
-t/03_zipped.t
+t/03_gzip.t
 t/04_bzip2.t
 t/05_stub.t
 t/06_stubgz.t
+t/07_badfile.t
 t/97_meta.t
 t/98_pod.t
 t/99_pmv.t
+t/data/broken.db
+t/data/broken.db.gz
 t/lib/Test.pm

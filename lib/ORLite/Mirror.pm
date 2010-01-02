@@ -14,11 +14,11 @@ use IO::Uncompress::Gunzip  2.008 ();
 use IO::Uncompress::Bunzip2 2.008 ();
 use LWP::UserAgent          5.806 ();
 use LWP::Online              1.07 ();
-use ORLite                   1.28 ();
+use ORLite                   1.30 ();
 
 use vars qw{$VERSION @ISA};
 BEGIN {
-	$VERSION = '1.17';
+	$VERSION = '1.18';
 	@ISA     = 'ORLite';
 }
 
@@ -77,13 +77,13 @@ sub import {
 	unless ( Params::Util::_NONNEGINT($maxage) ) {
 		Carp::croak("Invalid maxage param '$maxage'");
 	}
-	
+
 	# Find the stub database
 	my $stub = delete $params{stub};
 	if ( $stub ) {
 		$stub = File::ShareDir::module_file(
 			$params{package} => 'stub.db'
-		);
+		) if $stub eq '1';
 		unless ( -f $stub ) {
 			Carp::croak("Stub database '$stub' does not exist");
 		}
@@ -92,7 +92,7 @@ sub import {
 	# Check when we should update
 	my $update = delete $params{update};
 	unless ( defined $update ) {
-		$update = 'compile';
+		$update = $stub ? 'connect' : 'compile';
 	}
 	unless ( $update =~ /^(?:compile|connect)$/ ) {
 		Carp::croak("Invalid update param '$update'");
@@ -189,7 +189,7 @@ sub import {
 
 		# If we updated the file, add any extra indexes that we need
 		if ( $refreshed and $params{index} ) {
-			my $dbh = DBI->connect("DBI:SQLite:$db", undef, undef, {
+			my $dbh = DBI->connect( "DBI:SQLite:$db", undef, undef, {
 				RaiseError => 1,
 				PrintError => 1,
 			} );
@@ -208,17 +208,6 @@ sub import {
 	# If and only if they update at connect-time, replace the
 	# original dbh method with one that syncs the database.
 	if ( $update eq 'connect' ) {
-		# Generate the user_version checking fragment
-		my $check_version = '';
-		if ( $params{user_version} ) {
-			$check_version = <<"END_PERL";
-	unless ( \$class->pragma('user_version') == $params{user_version} ) {
-
-	}
-
-END_PERL
-		}
-
 		# Generate the archive decompression fragment
 		my $decompress = '';
 		if ( $path =~ /\.gz$/ ) {
@@ -232,7 +221,7 @@ END_PERL
 
 		require IO::Uncompress::Gunzip;
 		IO::Uncompress::Gunzip::gunzip(
-			\$PATH => \$sqlite,
+			\$PATH      => \$sqlite,
 			BinModeOut => 1,
 		) or Carp::croak("Error: gunzip(\$PATH) failed");
 	}
@@ -249,7 +238,7 @@ END_PERL
 
 		require IO::Uncompress::Bunzip2;
 		IO::Uncompress::Bunzip2::bunzip2(
-			\$PATH => \$sqlite,
+			\$PATH      => \$sqlite,
 			BinModeOut => 1,
 		) or Carp::croak("Error: bunzip2(\$PATH) failed");
 	}
@@ -264,21 +253,29 @@ use Carp ();
 use vars qw{ \$REFRESHED };
 BEGIN {
 	\$REFRESHED = 0;
-	delete \$$params{package}::{DBH};
+	# delete \$$params{package}::{DBH};
 }
 
 my \$URL  = '$url';
 my \$PATH = '$path';
 
 sub refresh {
-	my \$class     = shift;
-	my \%param     = \@_;
+	my \$class = shift;
+	my \%param = \@_;
+
 	require LWP::UserAgent;
 	my \$useragent = LWP::UserAgent->new(
 		agent         => '$agent',
 		timeout       => 30,
 		show_progress => !! \$param{show_progress},
 	);
+
+	# Set the refresh flag now, so the call to ->pragma won't
+	# head off into an infinite recursion.
+	\$REFRESHED = 1;
+
+	# Save the old schema version
+	my \$old_version = \$class->pragma('user_version');
 
 	# Flush the existing database
 	require File::Remove;
@@ -293,9 +290,12 @@ sub refresh {
 	}
 
 $decompress
-	\$REFRESHED = 1;
+	# The new schema version must match the previous or stub version
+	my \$version = \$class->pragma('user_version');
+	unless ( \$version == \$old_version ) {
+		Carp::croak("Schema user_version mismatch (got \$version, wanted \$old_version)");
+	}
 
-$check_version
 	return 1;
 }
 
@@ -307,7 +307,10 @@ sub connect {
 			show_progress => $show_progress,
 		);
 	}
-	DBI->connect(\$class->dsn);
+	DBI->connect( \$class->dsn, undef, undef, {
+		RaiseError => 1,
+		PrintError => 0,
+	} );
 }
 END_PERL
 	}
@@ -370,7 +373,7 @@ Adam Kennedy E<lt>adamk@cpan.orgE<gt>
 
 =head1 COPYRIGHT
 
-Copyright 2008 - 2009 Adam Kennedy.
+Copyright 2008 - 2010 Adam Kennedy.
 
 This program is free software; you can redistribute
 it and/or modify it under the same terms as Perl itself.
