@@ -27,9 +27,9 @@ t/05_stub.t
 t/06_stubgz.t
 t/07_badfile.t
 t/08_array.t
-t/97_meta.t
-t/98_pod.t
-t/99_pmv.t
 t/data/broken.db
 t/data/broken.db.gz
 t/lib/Test.pm
+xt/meta.t
+xt/pmv.t
+xt/pod.t
