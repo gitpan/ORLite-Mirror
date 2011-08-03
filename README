@@ -5,14 +5,21 @@ SYNOPSIS
       # Regular ORLite on a readonly SQLite database
       use ORLite 'path/mydb.sqlite';
       
-  # The equivalent for a remote SQLite database
-      use ORLite::Mirror 'http://myserver/path/mydb.sqlite';
-      
-  # You can read compressed SQLite databases as well
+  # The equivalent for a remote (optionally compressed) SQLite database
       use ORLite::Mirror 'http://myserver/path/mydb.sqlite.gz';
-      use ORLite::Mirror 'http://myserver/path/mydb.sqlite.bz2';
       
-  (Of course you can only do one of the above)
+  # All available additional options specified
+      use ORLite::Mirror {
+          url           => 'http://myserver/path/mydb.sqlite.gz',
+          maxage        => 3600,
+          show_progress => 1,
+          env_proxy     => 1,
+          prune         => 1,
+          index         => [
+              'table1.column1',
+              'table1.column2',
+          ],
+      };
 
 DESCRIPTION
     ORLite provides a readonly ORM API when it loads a readonly SQLite
